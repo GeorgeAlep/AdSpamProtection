@@ -1,0 +1,14 @@
+2023-10-09 15:03:47 - Ad clicked by IP: ::1 - Referrer: http://localhost/adProtection/public/index.php
+2023-10-09 15:03:47 - Ad clicked by IP: ::1 - Referrer: http://localhost/adProtection/public/ad_content.php
+2023-10-09 15:23:09 - Ad clicked by IP: ::1 - Referrer: http://localhost/adProtection/public/index.php
+2023-10-09 15:23:11 - Ad clicked by IP: ::1 - Referrer: http://localhost/adProtection/public/index.php
+2023-10-09 15:23:11 - Ad clicked by IP: ::1 - Referrer: http://localhost/adProtection/public/index.php
+2023-10-09 15:23:34 - Ad clicked by IP: ::1 - Referrer: http://localhost/adProtection/public/index.php
+2023-10-09 15:23:35 - Ad clicked by IP: ::1 - Referrer: http://localhost/adProtection/public/index.php
+2023-10-09 15:23:35 - Ad clicked by IP: ::1 - Referrer: http://localhost/adProtection/public/index.php
+2023-10-09 15:25:03 - Ad clicked by IP: ::1 - Referrer: http://localhost/adProtection/public/index.php
+2023-10-09 15:25:05 - Ad clicked by IP: ::1 - Referrer: http://localhost/adProtection/public/index.php
+2023-10-09 15:25:05 - Ad clicked by IP: ::1 - Referrer: http://localhost/adProtection/public/index.php
+2023-10-09 15:30:39 - Ad clicked by IP: ::1 - Referrer: http://localhost/adProtection/public/index.php
+2023-10-09 15:30:42 - Ad clicked by IP: ::1 - Referrer: http://localhost/adProtection/public/index.php
+2023-10-09 15:30:45 - Ad clicked by IP: ::1 - Referrer: http://localhost/adProtection/public/index.php
