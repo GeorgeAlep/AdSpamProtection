@@ -69,7 +69,6 @@ $message2 = isIPBlocked($pdo, $ip_address, "adUnit2") ? "Ad not displayed becaus
                     .then(fp => fp.get())
                     .then(result => {
                         let fingerprint = result.visitorId;
-                        console.log("Captured Fingerprint:", fingerprint);
                         sendAdInteractionRequest(adUnit, fingerprint);
                     });
             <?php else: ?>

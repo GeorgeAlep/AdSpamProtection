@@ -3,7 +3,7 @@
 -- https://www.phpmyadmin.net/
 --
 -- Host: 127.0.0.1
--- Erstellungszeit: 09. Okt 2023 um 19:39
+-- Erstellungszeit: 10. Okt 2023 um 18:28
 -- Server-Version: 10.4.28-MariaDB
 -- PHP-Version: 8.2.4
 
@@ -38,7 +38,7 @@ CREATE TABLE `admins` (
 --
 
 INSERT INTO `admins` (`id`, `username`, `hashed_password`) VALUES
-(1, 'admin', '$2y$10$QGqOHdPYKY4nPhFX7pYdueikZPVWeupYgTaCEaU7PTWlgtGtKqccC');
+(1, 'admin', '$2y$10$.fppyR6HfIXLk6hPQHx/AOnSwFwAW5N/Su04/Rllg5m9mV.0q7Qp2');
 
 -- --------------------------------------------------------
 
@@ -48,9 +48,18 @@ INSERT INTO `admins` (`id`, `username`, `hashed_password`) VALUES
 
 CREATE TABLE `blocked_ips_table` (
   `id` int(11) NOT NULL,
-  `ip_address` varchar(255) NOT NULL,
-  `block_until` timestamp NOT NULL DEFAULT current_timestamp() ON UPDATE current_timestamp()
+  `ip_address` varchar(45) NOT NULL,
+  `block_until` timestamp NOT NULL DEFAULT current_timestamp() ON UPDATE current_timestamp(),
+  `ad_unit_id` varchar(255) DEFAULT NULL,
+  `fingerprint` varchar(255) DEFAULT NULL
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_general_ci;
+
+--
+-- Daten für Tabelle `blocked_ips_table`
+--
+
+INSERT INTO `blocked_ips_table` (`id`, `ip_address`, `block_until`, `ad_unit_id`, `fingerprint`) VALUES
+(131, '::1', '2023-10-10 16:28:04', 'adUnit1', '0bfbaa795e52ceee684c031b8deecfc9');
 
 -- --------------------------------------------------------
 
@@ -60,10 +69,11 @@ CREATE TABLE `blocked_ips_table` (
 
 CREATE TABLE `clicks_table` (
   `id` int(11) NOT NULL,
-  `ip_address` varchar(255) NOT NULL,
+  `ip_address` varchar(45) NOT NULL,
   `ad_unit_id` varchar(255) NOT NULL,
   `fingerprint` varchar(255) DEFAULT NULL,
-  `clicked_at` timestamp NOT NULL DEFAULT current_timestamp()
+  `clicked_at` timestamp NOT NULL DEFAULT current_timestamp(),
+  `ad_id` varchar(255) NOT NULL
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_general_ci;
 
 -- --------------------------------------------------------
@@ -76,6 +86,13 @@ CREATE TABLE `permanent_blocks` (
   `id` int(11) NOT NULL,
   `ip_range` varchar(255) NOT NULL
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_general_ci;
+
+--
+-- Daten für Tabelle `permanent_blocks`
+--
+
+INSERT INTO `permanent_blocks` (`id`, `ip_range`) VALUES
+(23, 'a');
 
 -- --------------------------------------------------------
 
@@ -94,10 +111,11 @@ CREATE TABLE `settings` (
 --
 
 INSERT INTO `settings` (`id`, `name`, `value`) VALUES
-(1, 'adProtection_clickLimit', '1'),
-(2, 'adProtection_timeFrame', '30 SECOND'),
-(3, 'adProtection_blockDuration', '10 SECOND'),
-(4, 'adProtection_fingerprintjsEnabled', '0');
+(6, 'ad_block_mode', 'all'),
+(7, 'adProtection_clickLimit', '3'),
+(8, 'adProtection_timeFrame', '20 SECOND'),
+(9, 'adProtection_blockDuration', '10 SECOND'),
+(10, 'adProtection_fingerprintjsEnabled', '1');
 
 --
 -- Indizes der exportierten Tabellen
@@ -115,7 +133,7 @@ ALTER TABLE `admins`
 --
 ALTER TABLE `blocked_ips_table`
   ADD PRIMARY KEY (`id`),
-  ADD UNIQUE KEY `ip_address` (`ip_address`);
+  ADD UNIQUE KEY `ip_address` (`ip_address`,`ad_unit_id`);
 
 --
 -- Indizes für die Tabelle `clicks_table`
@@ -151,25 +169,25 @@ ALTER TABLE `admins`
 -- AUTO_INCREMENT für Tabelle `blocked_ips_table`
 --
 ALTER TABLE `blocked_ips_table`
-  MODIFY `id` int(11) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=48;
+  MODIFY `id` int(11) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=132;
 
 --
 -- AUTO_INCREMENT für Tabelle `clicks_table`
 --
 ALTER TABLE `clicks_table`
-  MODIFY `id` int(11) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=72;
+  MODIFY `id` int(11) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=246;
 
 --
 -- AUTO_INCREMENT für Tabelle `permanent_blocks`
 --
 ALTER TABLE `permanent_blocks`
-  MODIFY `id` int(11) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=21;
+  MODIFY `id` int(11) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=24;
 
 --
 -- AUTO_INCREMENT für Tabelle `settings`
 --
 ALTER TABLE `settings`
-  MODIFY `id` int(11) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=5;
+  MODIFY `id` int(11) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=11;
 COMMIT;
 
 /*!40101 SET CHARACTER_SET_CLIENT=@OLD_CHARACTER_SET_CLIENT */;
