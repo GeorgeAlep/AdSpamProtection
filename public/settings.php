@@ -1,9 +1,13 @@
 <?php
 session_start();
 
+ini_set('display_errors', 0); // Turn off error displaying
+ini_set('log_errors', 1); // Turn on error logging
+ini_set('error_log', '/path_to_log_directory/php-error.log'); // Set the log file path
+
 if (!isset($_SESSION['loggedin']) || $_SESSION['loggedin'] !== true) {
-    header('Location: login.php');
-    exit;
+  header('Location: login.php');
+  exit;
 }
 
 include 'common.php';
@@ -17,12 +21,14 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
   $timeFrame = $_POST['adProtection_timeFrame'];
   $blockDuration = $_POST['adProtection_blockDuration'];
   $fingerprintjsEnabled = isset($_POST['adProtection_fingerprintjsEnabled']) ? 1 : 0;
+  $ad_block_mode = $_POST['ad_block_mode'];
 
   // Update the settings in the database
   updateSetting($pdo, 'adProtection_clickLimit', $clickLimit);
   updateSetting($pdo, 'adProtection_timeFrame', $timeFrame);
   updateSetting($pdo, 'adProtection_blockDuration', $blockDuration);
   updateSetting($pdo, 'adProtection_fingerprintjsEnabled', $fingerprintjsEnabled);
+  updateSetting($pdo, 'ad_block_mode', $ad_block_mode);
 
   // Refresh the settings after update
   $settings = fetchSettings($pdo);
@@ -64,12 +70,24 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
       <input type="checkbox" name="adProtection_fingerprintjsEnabled" <?php echo isset($settings['adProtection_fingerprintjsEnabled']) && $settings['adProtection_fingerprintjsEnabled'] ? 'checked' : ''; ?>>
     </label>
     <br>
-    <input type="submit" value="Update Settings">
+
+    <h3>Ad Block Mode</h3>
+    <label>
+      <input type="radio" name="ad_block_mode" value="single" <?php echo (isset($settings['ad_block_mode']) && $settings['ad_block_mode'] == 'single') ? 'checked' : ''; ?>>
+      Block only the clicked ad
+    </label>
+    <br>
+    <label>
+      <input type="radio" name="ad_block_mode" value="all" <?php echo (isset($settings['ad_block_mode']) && $settings['ad_block_mode'] == 'all') ? 'checked' : ''; ?>>
+      Block all ads on the page
+    </label>
+    <br>
+    <input type="submit" value="Update">
   </form>
   <br>
   <!-- Back To Dashboard -->
   <h3>Dashboard</h3>
-    <a href="dashboard.php">Back to Dashboard</a>
+  <a href="dashboard.php">Back to Dashboard</a>
 </body>
 
 </html>

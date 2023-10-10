@@ -38,8 +38,12 @@ $permanentlyBlockedIPs = $stmt->fetchAll(PDO::FETCH_ASSOC);
     <h3>Configuration</h3>
     <a href="settings.php">Configure Script Settings</a>
 
+    <h4>Admin Password</h4>
+    <a href="change_password.php">Change Password</a>
+
+
     <!-- Display Blocked IPs with Option to Delete -->
-    <h3>Blocked IP Addresses</h3>
+    <h5>Blocked IP Addresses</h5>
     <table>
         <thead>
             <tr>

@@ -15,9 +15,11 @@ $blockDuration = $settings['adProtection_blockDuration'] ?? "1 HOUR";
 $enableFingerprintJS = $settings['adProtection_fingerprintjsEnabled'] ?? false;
 
 $ip_address = $_SERVER['REMOTE_ADDR'];
-$fingerprint = "sampleFingerprint"; // This should be replaced with actual fingerprinting logic
+$fingerprint = $_POST['fingerprint'] ?? null;
 $ad_unit_id = "adUnit1";
-$message = isIPBlocked($pdo, $ip_address) ? "Ad not displayed because your IP is blocked." : "";
+$message1 = isIPBlocked($pdo, $ip_address, "adUnit1") ? "Ad not displayed because your IP is blocked." : "";
+$message2 = isIPBlocked($pdo, $ip_address, "adUnit2") ? "Ad not displayed because your IP is blocked." : "";
+
 ?>
 
 <!DOCTYPE html>
@@ -30,12 +32,26 @@ $message = isIPBlocked($pdo, $ip_address) ? "Ad not displayed because your IP is
 </head>
 
 <body>
-    <div id="adContent">
-        <?php if (!$message): ?>
-            <?php include 'ad_content.php'; ?>
+    <!-- First Ad -->
+    <div id="adContent1">
+        <?php if (!$message1): ?>
+            <?php include 'ad_content1.php'; ?>
         <?php else: ?>
             <p>
-                <?php echo $message; ?>
+                <?php echo $message1; ?>
+            </p>
+        <?php endif; ?>
+    </div>
+
+    <br>
+
+    <!-- Second Ad -->
+    <div id="adContent2">
+        <?php if (!$message2): ?>
+            <?php include 'ad_content2.php'; ?>
+        <?php else: ?>
+            <p>
+                <?php echo $message2; ?>
             </p>
         <?php endif; ?>
     </div>
@@ -43,43 +59,71 @@ $message = isIPBlocked($pdo, $ip_address) ? "Ad not displayed because your IP is
     <p id="message"></p>
 
     <script>
-        function handleAdInteraction() {
-            // Send AJAX request
+        function handleAdInteraction(adUnit) {
+            <?php if ($enableFingerprintJS): ?>
+                // If FingerprintJS is enabled, capture the fingerprint and send it with the AJAX request
+                const fpPromise = import('https://openfpcdn.io/fingerprintjs/v4')
+                    .then(FingerprintJS => FingerprintJS.load());
+
+                fpPromise
+                    .then(fp => fp.get())
+                    .then(result => {
+                        let fingerprint = result.visitorId;
+                        console.log("Captured Fingerprint:", fingerprint);
+                        sendAdInteractionRequest(adUnit, fingerprint);
+                    });
+            <?php else: ?>
+                // If FingerprintJS is not enabled, send the AJAX request without the fingerprint
+                sendAdInteractionRequest(adUnit);
+            <?php endif; ?>
+        }
+
+        function sendAdInteractionRequest(adUnit, fingerprint = null) {
+            let requestBody = 'ad_clicked=1&ad_unit=' + adUnit;
+            if (fingerprint) {
+                requestBody += '&fingerprint=' + fingerprint;
+            }
+
             fetch('process_click.php', {
                 method: 'POST',
                 headers: {
                     'Content-Type': 'application/x-www-form-urlencoded',
                 },
-                body: 'ad_clicked=1'
+                body: requestBody
             })
                 .then(response => response.json())
-                .then(data => {
+                .then(parsedData => {
                     // Update the message based on the server's response
-                    document.getElementById('message').textContent = data.message;
+                    document.getElementById('message').textContent = parsedData.message;
 
-                    // If the user is blocked, hide the ad content
-                    if (data.message.includes("blocked")) {
-                        document.getElementById('adContent').style.display = 'none';
+                    if (parsedData.message.includes("blocked")) {
+                        if (adUnit === 'adUnit1') {
+                            document.getElementById('adContent1').style.display = 'none';
+                        } else if (adUnit === 'adUnit2') {
+                            document.getElementById('adContent2').style.display = 'none';
+                        }
+
+                        // If mode is set to block all ads, hide both ads
+                        let adBlockMode = "<?php echo getAdBlockMode($pdo); ?>";
+                        if (adBlockMode === 'all') {
+                            document.getElementById('adContent1').style.display = 'none';
+                            document.getElementById('adContent2').style.display = 'none';
+                        }
                     }
+                })
+                .catch(error => {
+                    console.error('Error:', error);
+                    document.getElementById('message').textContent = 'An error occurred. Check the console for details.';
                 });
         }
 
-        document.getElementById('adContent').addEventListener('click', handleAdInteraction);
-        document.getElementById('adContent').addEventListener('touchstart', handleAdInteraction);
-        document.getElementById('adContent').addEventListener('contextmenu', function (event) {
-            event.preventDefault(); // Prevent the context menu from appearing
-            handleAdInteraction();
-        });
-
+        document.getElementById('adContent1').addEventListener('click', function () { handleAdInteraction('adUnit1'); });
+        document.getElementById('adContent2').addEventListener('click', function () { handleAdInteraction('adUnit2'); });
     </script>
 
     <!-- Include FingerprintJS library if enabled -->
     <?php if ($enableFingerprintJS): ?>
-        <script src="path_to_fingerprintjs_library"></script>
-        <script>
-            // Initialize and get the fingerprint
-            // Update the fingerprint variable in the PHP script accordingly
-        </script>
+        <script src="https://cdnjs.cloudflare.com/ajax/libs/fingerprintjs2/2.1.0/fingerprint2.min.js"></script>
     <?php endif; ?>
 </body>
 
