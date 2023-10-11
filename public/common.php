@@ -95,4 +95,51 @@ function updateSetting($pdo, $tablePrefix, $name, $value)
     $stmt = $pdo->prepare("UPDATE {$tablePrefix}settings SET value = ? WHERE name = ?");
     $stmt->execute([$value, $name]);
 }
+
+function tableExists($pdo, $tableName)
+{
+    try {
+        $result = $pdo->query("SELECT 1 FROM `$tableName` LIMIT 1");
+        return true;
+    } catch (PDOException $e) {
+        return false;
+    }
+}
+
+function renameTablesBackToOriginal($pdo, $currentPrefix)
+{
+    $originalNames = [
+        'admins',
+        'blocked_ips_table',
+        'settings',
+        'clicks_table',
+        'permanent_blocks'
+    ];
+
+    foreach ($originalNames as $tableName) {
+        $prefixedName = $currentPrefix . $tableName;
+        $renameQuery = "ALTER TABLE `$prefixedName` RENAME `$tableName`";
+        $pdo->exec($renameQuery);
+    }
+}
+
+function renameTablesBasedOnPrefix($pdo, $currentPrefix, $newPrefix)
+{
+    renameTablesBackToOriginal($pdo, $currentPrefix);
+
+    $originalNames = [
+        'admins',
+        'blocked_ips_table',
+        'settings',
+        'clicks_table',
+        'permanent_blocks'
+    ];
+
+    foreach ($originalNames as $tableName) {
+        $newTableName = $newPrefix . $tableName;
+        $renameQuery = "ALTER TABLE `$tableName` RENAME `$newTableName`";
+        $pdo->exec($renameQuery);
+    }
+}
+
 ?>

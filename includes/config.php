@@ -5,7 +5,7 @@ $user = 'root'; // default user for XAMPP/MAMP
 $pass = ''; // default password for XAMPP is empty, for MAMP it might be 'root'
 $charset = 'utf8mb4';
 
-$tablePrefix = 'myPrefix_';
+$tablePrefix = '';
 
 $dsn = "mysql:host=$host;dbname=$db;charset=$charset";
 $options = [

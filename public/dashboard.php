@@ -2,6 +2,12 @@
 include 'common.php';
 session_start();
 
+if (isset($_POST['renameTables'])) {
+    $currentPrefix = $_POST['currentPrefix'];
+    $newPrefix = $_POST['newPrefix'];
+    renameTablesBasedOnPrefix($pdo, $currentPrefix, $newPrefix);
+}
+
 $noAdmins = true; // Default to true
 
 // Check if admins table exists
@@ -192,6 +198,14 @@ try {
                         </label>
                         <br>
                         <input type="submit" value="Import">
+                    </form>
+
+                    <h4>Update Table Prefix</h4>
+
+                    <form action="dashboard.php" method="post">
+                        Current Prefix: <input type="text" name="currentPrefix" /><br>
+                        New Prefix: <input type="text" name="newPrefix" /><br>
+                        <input type="submit" name="renameTables" value="Rename Tables" />
                     </form>
                 </td>
             </tr>
