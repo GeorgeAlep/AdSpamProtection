@@ -8,7 +8,7 @@ $days_old = 30;
 $date_threshold = date('Y-m-d H:i:s', strtotime("-$days_old days"));
 
 // Delete entries older than the threshold from the `blocked_ips_table`
-$stmt = $pdo->prepare("DELETE FROM blocked_ips_table WHERE block_until < ?");
+$stmt = $pdo->prepare("DELETE FROM {$tablePrefix}blocked_ips_table WHERE block_until < ?");
 $stmt->execute([$date_threshold]);
 
 echo "Old entries purged successfully!";

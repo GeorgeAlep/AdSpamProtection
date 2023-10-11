@@ -13,7 +13,7 @@ if (!isset($_SESSION['loggedin']) || $_SESSION['loggedin'] !== true) {
 include 'common.php';
 
 // Fetch the current settings
-$settings = fetchSettings($pdo);
+$settings = fetchSettings($pdo, $tablePrefix);
 
 // Handle form submission
 if ($_SERVER['REQUEST_METHOD'] === 'POST') {
@@ -24,14 +24,14 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
   $ad_block_mode = $_POST['ad_block_mode'];
 
   // Update the settings in the database
-  updateSetting($pdo, 'adProtection_clickLimit', $clickLimit);
-  updateSetting($pdo, 'adProtection_timeFrame', $timeFrame);
-  updateSetting($pdo, 'adProtection_blockDuration', $blockDuration);
-  updateSetting($pdo, 'adProtection_fingerprintjsEnabled', $fingerprintjsEnabled);
-  updateSetting($pdo, 'ad_block_mode', $ad_block_mode);
+  updateSetting($pdo, $tablePrefix, 'adProtection_clickLimit', $clickLimit);
+  updateSetting($pdo, $tablePrefix, 'adProtection_timeFrame', $timeFrame);
+  updateSetting($pdo, $tablePrefix, 'adProtection_blockDuration', $blockDuration);
+  updateSetting($pdo, $tablePrefix, 'adProtection_fingerprintjsEnabled', $fingerprintjsEnabled);
+  updateSetting($pdo, $tablePrefix, 'ad_block_mode', $ad_block_mode);
 
   // Refresh the settings after update
-  $settings = fetchSettings($pdo);
+  $settings = fetchSettings($pdo, $tablePrefix);
 }
 
 ?>

@@ -1,7 +1,7 @@
 <?php
 include 'common.php';
 
-$settings = fetchSettings($pdo);
+$settings = fetchSettings($pdo, $tablePrefix);
 $clickLimit = $settings['adProtection_clickLimit'] ?? 3;
 $timeQuantity = 20; // default value
 $timeUnit = "SECOND"; // default value
@@ -17,8 +17,8 @@ $enableFingerprintJS = $settings['adProtection_fingerprintjsEnabled'] ?? false;
 $ip_address = $_SERVER['REMOTE_ADDR'];
 $fingerprint = $_POST['fingerprint'] ?? null;
 $ad_unit_id = "adUnit1";
-$message1 = isIPBlocked($pdo, $ip_address, "adUnit1") ? "Ad not displayed because your IP is blocked." : "";
-$message2 = isIPBlocked($pdo, $ip_address, "adUnit2") ? "Ad not displayed because your IP is blocked." : "";
+$message1 = isIPBlocked($pdo, $tablePrefix, $ip_address, "adUnit1") ? "Ad not displayed because your IP is blocked." : "";
+$message2 = isIPBlocked($pdo, $tablePrefix, $ip_address, "adUnit2") ? "Ad not displayed because your IP is blocked." : "";
 
 ?>
 
@@ -103,7 +103,7 @@ $message2 = isIPBlocked($pdo, $ip_address, "adUnit2") ? "Ad not displayed becaus
                         }
 
                         // If mode is set to block all ads, hide both ads
-                        let adBlockMode = "<?php echo getAdBlockMode($pdo); ?>";
+                        let adBlockMode = "<?php echo getAdBlockMode($pdo, $tablePrefix); ?>";
                         if (adBlockMode === 'all') {
                             document.getElementById('adContent1').style.display = 'none';
                             document.getElementById('adContent2').style.display = 'none';

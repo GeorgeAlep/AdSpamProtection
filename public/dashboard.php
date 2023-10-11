@@ -1,25 +1,24 @@
 <?php
 include 'common.php';
-
 session_start();
 
 $noAdmins = true; // Default to true
 
 // Check if admins table exists
-$query = "SHOW TABLES LIKE 'admins'";
+$query = "SHOW TABLES LIKE '{$tablePrefix}admins'";
 $result = $pdo->query($query);
 $adminsTableExists = $result->rowCount() > 0;
 
 // If admins table exists, then check if it has any records
 if ($adminsTableExists) {
-    $stmt = $pdo->prepare("SELECT COUNT(*) as total_admins FROM admins");
+    $stmt = $pdo->prepare("SELECT COUNT(*) as total_admins FROM {$tablePrefix}admins");
     $stmt->execute();
     $result = $stmt->fetch(PDO::FETCH_ASSOC);
     $noAdmins = $result['total_admins'] == 0;
 }
 
 // Check if blocked_ips_table exists
-$query = "SHOW TABLES LIKE 'blocked_ips_table'";
+$query = "SHOW TABLES LIKE '{$tablePrefix}blocked_ips_table'";
 $result = $pdo->query($query);
 $blockedIPsTableExists = $result->rowCount() > 0;
 
@@ -33,7 +32,7 @@ if (!$noAdmins && (!isset($_SESSION['loggedin']) || $_SESSION['loggedin'] !== tr
 $blockedIPs = [];
 if ($blockedIPsTableExists) {
     try {
-        $stmt = $pdo->prepare("SELECT ip_address, GROUP_CONCAT(fingerprint) as fingerprints, GROUP_CONCAT(ad_unit_id) as ad_units, block_until FROM blocked_ips_table GROUP BY ip_address");
+        $stmt = $pdo->prepare("SELECT ip_address, GROUP_CONCAT(fingerprint) as fingerprints, GROUP_CONCAT(ad_unit_id) as ad_units, block_until FROM {$tablePrefix}blocked_ips_table GROUP BY ip_address");
         $stmt->execute();
         $blockedIPs = $stmt->fetchAll(PDO::FETCH_ASSOC);
     } catch (PDOException $e) {
@@ -45,7 +44,7 @@ if ($blockedIPsTableExists) {
 // Fetch permanently blocked IPs
 $permanentBlockedIPs = [];
 try {
-    $stmt = $pdo->prepare("SELECT ip_range FROM permanent_blocks");
+    $stmt = $pdo->prepare("SELECT ip_range FROM {$tablePrefix}permanent_blocks");
     $stmt->execute();
     $permanentBlockedIPs = $stmt->fetchAll(PDO::FETCH_ASSOC);
 } catch (PDOException $e) {

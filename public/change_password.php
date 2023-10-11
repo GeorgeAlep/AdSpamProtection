@@ -17,14 +17,14 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
   $confirmPassword = $_POST['confirm_password'];
 
   // Fetch the hashed password for the logged-in user from the database
-  $stmt = $pdo->prepare("SELECT hashed_password FROM admins WHERE username = ?");
+  $stmt = $pdo->prepare("SELECT hashed_password FROM {$tablePrefix}admins WHERE username = ?");
   $stmt->execute([$_SESSION['username']]);
   $result = $stmt->fetch();
 
   if ($result && password_verify($currentPassword, $result['hashed_password'])) {
     if ($newPassword === $confirmPassword) {
       $hashedPassword = password_hash($newPassword, PASSWORD_DEFAULT);
-      $stmt = $pdo->prepare("UPDATE admins SET hashed_password = ? WHERE username = ?");
+      $stmt = $pdo->prepare("UPDATE {$tablePrefix}admins SET hashed_password = ? WHERE username = ?");
       $stmt->execute([$hashedPassword, $_SESSION['username']]);
       $message = "Password changed successfully!";
     } else {

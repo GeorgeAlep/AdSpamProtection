@@ -3,7 +3,7 @@
 -- https://www.phpmyadmin.net/
 --
 -- Host: 127.0.0.1
--- Erstellungszeit: 10. Okt 2023 um 18:28
+-- Erstellungszeit: 11. Okt 2023 um 17:13
 -- Server-Version: 10.4.28-MariaDB
 -- PHP-Version: 8.2.4
 
@@ -18,35 +18,35 @@ SET time_zone = "+00:00";
 /*!40101 SET NAMES utf8mb4 */;
 
 --
--- Datenbank: `ad_protection_db`
+-- Datenbank: `ad_protection_db_new`
 --
 
 -- --------------------------------------------------------
 
 --
--- Tabellenstruktur für Tabelle `admins`
+-- Tabellenstruktur für Tabelle `myprefix_admins`
 --
 
-CREATE TABLE `admins` (
+CREATE TABLE `myprefix_admins` (
   `id` int(11) NOT NULL,
   `username` varchar(255) NOT NULL,
   `hashed_password` varchar(255) NOT NULL
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_general_ci;
 
 --
--- Daten für Tabelle `admins`
+-- Daten für Tabelle `myprefix_admins`
 --
 
-INSERT INTO `admins` (`id`, `username`, `hashed_password`) VALUES
-(1, 'admin', '$2y$10$.fppyR6HfIXLk6hPQHx/AOnSwFwAW5N/Su04/Rllg5m9mV.0q7Qp2');
+INSERT INTO `myprefix_admins` (`id`, `username`, `hashed_password`) VALUES
+(1, 'admin', '$2y$10$DKkHfQaCGFXUrF//vL8dEO5Jl8sGKLxcYBe8jZ465TgTZbcd3utv2');
 
 -- --------------------------------------------------------
 
 --
--- Tabellenstruktur für Tabelle `blocked_ips_table`
+-- Tabellenstruktur für Tabelle `myprefix_blocked_ips_table`
 --
 
-CREATE TABLE `blocked_ips_table` (
+CREATE TABLE `myprefix_blocked_ips_table` (
   `id` int(11) NOT NULL,
   `ip_address` varchar(45) NOT NULL,
   `block_until` timestamp NOT NULL DEFAULT current_timestamp() ON UPDATE current_timestamp(),
@@ -54,20 +54,13 @@ CREATE TABLE `blocked_ips_table` (
   `fingerprint` varchar(255) DEFAULT NULL
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_general_ci;
 
---
--- Daten für Tabelle `blocked_ips_table`
---
-
-INSERT INTO `blocked_ips_table` (`id`, `ip_address`, `block_until`, `ad_unit_id`, `fingerprint`) VALUES
-(131, '::1', '2023-10-10 16:28:04', 'adUnit1', '0bfbaa795e52ceee684c031b8deecfc9');
-
 -- --------------------------------------------------------
 
 --
--- Tabellenstruktur für Tabelle `clicks_table`
+-- Tabellenstruktur für Tabelle `myprefix_clicks_table`
 --
 
-CREATE TABLE `clicks_table` (
+CREATE TABLE `myprefix_clicks_table` (
   `id` int(11) NOT NULL,
   `ip_address` varchar(45) NOT NULL,
   `ad_unit_id` varchar(255) NOT NULL,
@@ -79,42 +72,35 @@ CREATE TABLE `clicks_table` (
 -- --------------------------------------------------------
 
 --
--- Tabellenstruktur für Tabelle `permanent_blocks`
+-- Tabellenstruktur für Tabelle `myprefix_permanent_blocks`
 --
 
-CREATE TABLE `permanent_blocks` (
+CREATE TABLE `myprefix_permanent_blocks` (
   `id` int(11) NOT NULL,
   `ip_range` varchar(255) NOT NULL
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_general_ci;
 
---
--- Daten für Tabelle `permanent_blocks`
---
-
-INSERT INTO `permanent_blocks` (`id`, `ip_range`) VALUES
-(23, 'a');
-
 -- --------------------------------------------------------
 
 --
--- Tabellenstruktur für Tabelle `settings`
+-- Tabellenstruktur für Tabelle `myprefix_settings`
 --
 
-CREATE TABLE `settings` (
+CREATE TABLE `myprefix_settings` (
   `id` int(11) NOT NULL,
   `name` varchar(255) NOT NULL,
   `value` varchar(255) NOT NULL
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_general_ci;
 
 --
--- Daten für Tabelle `settings`
+-- Daten für Tabelle `myprefix_settings`
 --
 
-INSERT INTO `settings` (`id`, `name`, `value`) VALUES
-(6, 'ad_block_mode', 'all'),
+INSERT INTO `myprefix_settings` (`id`, `name`, `value`) VALUES
+(6, 'ad_block_mode', 'single'),
 (7, 'adProtection_clickLimit', '3'),
 (8, 'adProtection_timeFrame', '20 SECOND'),
-(9, 'adProtection_blockDuration', '10 SECOND'),
+(9, 'adProtection_blockDuration', '5 SECOND'),
 (10, 'adProtection_fingerprintjsEnabled', '1');
 
 --
@@ -122,36 +108,36 @@ INSERT INTO `settings` (`id`, `name`, `value`) VALUES
 --
 
 --
--- Indizes für die Tabelle `admins`
+-- Indizes für die Tabelle `myprefix_admins`
 --
-ALTER TABLE `admins`
+ALTER TABLE `myprefix_admins`
   ADD PRIMARY KEY (`id`),
   ADD UNIQUE KEY `username` (`username`);
 
 --
--- Indizes für die Tabelle `blocked_ips_table`
+-- Indizes für die Tabelle `myprefix_blocked_ips_table`
 --
-ALTER TABLE `blocked_ips_table`
+ALTER TABLE `myprefix_blocked_ips_table`
   ADD PRIMARY KEY (`id`),
   ADD UNIQUE KEY `ip_address` (`ip_address`,`ad_unit_id`);
 
 --
--- Indizes für die Tabelle `clicks_table`
+-- Indizes für die Tabelle `myprefix_clicks_table`
 --
-ALTER TABLE `clicks_table`
+ALTER TABLE `myprefix_clicks_table`
   ADD PRIMARY KEY (`id`);
 
 --
--- Indizes für die Tabelle `permanent_blocks`
+-- Indizes für die Tabelle `myprefix_permanent_blocks`
 --
-ALTER TABLE `permanent_blocks`
+ALTER TABLE `myprefix_permanent_blocks`
   ADD PRIMARY KEY (`id`),
   ADD UNIQUE KEY `ip_range` (`ip_range`);
 
 --
--- Indizes für die Tabelle `settings`
+-- Indizes für die Tabelle `myprefix_settings`
 --
-ALTER TABLE `settings`
+ALTER TABLE `myprefix_settings`
   ADD PRIMARY KEY (`id`),
   ADD UNIQUE KEY `name` (`name`);
 
@@ -160,33 +146,33 @@ ALTER TABLE `settings`
 --
 
 --
--- AUTO_INCREMENT für Tabelle `admins`
+-- AUTO_INCREMENT für Tabelle `myprefix_admins`
 --
-ALTER TABLE `admins`
+ALTER TABLE `myprefix_admins`
   MODIFY `id` int(11) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=3;
 
 --
--- AUTO_INCREMENT für Tabelle `blocked_ips_table`
+-- AUTO_INCREMENT für Tabelle `myprefix_blocked_ips_table`
 --
-ALTER TABLE `blocked_ips_table`
-  MODIFY `id` int(11) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=132;
+ALTER TABLE `myprefix_blocked_ips_table`
+  MODIFY `id` int(11) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=188;
 
 --
--- AUTO_INCREMENT für Tabelle `clicks_table`
+-- AUTO_INCREMENT für Tabelle `myprefix_clicks_table`
 --
-ALTER TABLE `clicks_table`
-  MODIFY `id` int(11) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=246;
+ALTER TABLE `myprefix_clicks_table`
+  MODIFY `id` int(11) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=438;
 
 --
--- AUTO_INCREMENT für Tabelle `permanent_blocks`
+-- AUTO_INCREMENT für Tabelle `myprefix_permanent_blocks`
 --
-ALTER TABLE `permanent_blocks`
-  MODIFY `id` int(11) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=24;
+ALTER TABLE `myprefix_permanent_blocks`
+  MODIFY `id` int(11) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=34;
 
 --
--- AUTO_INCREMENT für Tabelle `settings`
+-- AUTO_INCREMENT für Tabelle `myprefix_settings`
 --
-ALTER TABLE `settings`
+ALTER TABLE `myprefix_settings`
   MODIFY `id` int(11) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=11;
 COMMIT;
 

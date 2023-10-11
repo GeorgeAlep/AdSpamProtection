@@ -2,7 +2,6 @@
 include 'common.php';
 
 session_start();
-
 // Check if the user is already logged in
 if (isset($_SESSION['loggedin']) && $_SESSION['loggedin'] === true) {
   header('Location: dashboard.php');
@@ -15,7 +14,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
   $password = $_POST['password'];
 
   // Fetch the hashed password for the given username from the database
-  $stmt = $pdo->prepare("SELECT hashed_password FROM admins WHERE username = ?");
+  $stmt = $pdo->prepare("SELECT hashed_password FROM {$tablePrefix}admins WHERE username = ?");
   $stmt->execute([$username]);
   $result = $stmt->fetch();
 

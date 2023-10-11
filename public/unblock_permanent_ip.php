@@ -5,7 +5,7 @@ if (isset($_GET['ip'])) {
     $ip_range = $_GET['ip'];
 
     try {
-        $stmt = $pdo->prepare("DELETE FROM permanent_blocks WHERE ip_range = ?");
+        $stmt = $pdo->prepare("DELETE FROM {$tablePrefix}permanent_blocks WHERE ip_range = ?");
         $stmt->execute([$ip_range]);
 
         // Add a success message or log it as you see fit.
