@@ -1,6 +1,6 @@
 <?php
 $host = 'localhost';
-$db   = 'ad_protection_db';
+$db   = 'blep';
 $user = 'root'; // default user for XAMPP/MAMP
 $pass = '';     // default password for XAMPP is empty, for MAMP it might be 'root'
 $charset = 'utf8mb4';

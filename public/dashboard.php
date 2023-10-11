@@ -3,21 +3,55 @@ include 'common.php';
 
 session_start();
 
-// Ensure the user is logged in
-if (!isset($_SESSION['loggedin']) || $_SESSION['loggedin'] !== true) {
+$noAdmins = true; // Default to true
+
+// Check if admins table exists
+$query = "SHOW TABLES LIKE 'admins'";
+$result = $pdo->query($query);
+$adminsTableExists = $result->rowCount() > 0;
+
+// If admins table exists, then check if it has any records
+if ($adminsTableExists) {
+    $stmt = $pdo->prepare("SELECT COUNT(*) as total_admins FROM admins");
+    $stmt->execute();
+    $result = $stmt->fetch(PDO::FETCH_ASSOC);
+    $noAdmins = $result['total_admins'] == 0;
+}
+
+// Check if blocked_ips_table exists
+$query = "SHOW TABLES LIKE 'blocked_ips_table'";
+$result = $pdo->query($query);
+$blockedIPsTableExists = $result->rowCount() > 0;
+
+// Ensure the user is logged in only if there are admins in the database
+if (!$noAdmins && (!isset($_SESSION['loggedin']) || $_SESSION['loggedin'] !== true)) {
     header('Location: login.php');
     exit;
 }
 
-// Fetch blocked IPs from the database
-$stmt = $pdo->prepare("SELECT ip_address, block_until FROM blocked_ips_table");
-$stmt->execute();
-$blockedIPs = $stmt->fetchAll(PDO::FETCH_ASSOC);
+// Attempt to fetch blocked IPs if the table exists
+$blockedIPs = [];
+if ($blockedIPsTableExists) {
+    try {
+        $stmt = $pdo->prepare("SELECT ip_address, GROUP_CONCAT(fingerprint) as fingerprints, GROUP_CONCAT(ad_unit_id) as ad_units, block_until FROM blocked_ips_table GROUP BY ip_address");
+        $stmt->execute();
+        $blockedIPs = $stmt->fetchAll(PDO::FETCH_ASSOC);
+    } catch (PDOException $e) {
+        echo $e->getMessage(); // Display the error message. Don't use this in production as it might reveal sensitive information.
+        $blockedIPs = false;
+    }
+}
 
-// Fetch permanently blocked IPs from the database
-$stmt = $pdo->prepare("SELECT ip_range FROM permanent_blocks");
-$stmt->execute();
-$permanentlyBlockedIPs = $stmt->fetchAll(PDO::FETCH_ASSOC);
+// Fetch permanently blocked IPs
+$permanentBlockedIPs = [];
+try {
+    $stmt = $pdo->prepare("SELECT ip_range FROM permanent_blocks");
+    $stmt->execute();
+    $permanentBlockedIPs = $stmt->fetchAll(PDO::FETCH_ASSOC);
+} catch (PDOException $e) {
+    echo $e->getMessage();
+    $permanentBlockedIPs = false;
+}
 ?>
 
 <!DOCTYPE html>
@@ -27,77 +61,143 @@ $permanentlyBlockedIPs = $stmt->fetchAll(PDO::FETCH_ASSOC);
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Dashboard</title>
+    <style>
+        table {
+            border-collapse: collapse;
+            width: 100%;
+            margin-top: 20px;
+        }
+
+        table,
+        th,
+        td {
+            border: 1px solid black;
+        }
+
+        th,
+        td {
+            padding: 10px;
+            text-align: left;
+        }
+
+        th {
+            background-color: #f2f2f2;
+        }
+
+        tr:hover {
+            background-color: #f5f5f5;
+        }
+    </style>
 </head>
 
 <body>
     <h2>Ad Protection Dashboard</h2>
 
-    <a href="logout.php">Logout</a>
+    <?php if (!$noAdmins): ?>
+        <a href="logout.php">Logout</a>
+    <?php endif; ?>
 
-    <!-- Configuration Options for the Script Settings -->
-    <h3>Configuration</h3>
-    <a href="settings.php">Configure Script Settings</a>
-
-    <h4>Admin Password</h4>
-    <a href="change_password.php">Change Password</a>
-
-
-    <!-- Display Blocked IPs with Option to Delete -->
-    <h5>Blocked IP Addresses</h5>
     <table>
         <thead>
             <tr>
-                <th>IP Address</th>
-                <th>Blocked Until</th>
-                <th>Action</th>
+                <th colspan="2">Configuration</th>
             </tr>
         </thead>
         <tbody>
-            <?php foreach ($blockedIPs as $ip): ?>
-                <tr>
-                    <td>
-                        <?php echo $ip['ip_address']; ?>
-                    </td>
-                    <td>
-                        <?php echo $ip['block_until']; ?>
-                    </td>
-                    <td><a href="delete_ip.php?ip=<?php echo $ip['ip_address']; ?>">Delete</a></td>
-                </tr>
-            <?php endforeach; ?>
-        </tbody>
-    </table>
-
-    <!-- Form to Add Permanent Blocks -->
-    <h3>Permanently Block IP or Range</h3>
-    <form action="add_permanent_block.php" method="post">
-        <label>
-            IP Address or Range:
-            <input type="text" name="ip_range" required>
-        </label>
-        <br>
-        <input type="submit" value="Block">
-    </form>
-
-    <h3>Permanently Blocked IP Addresses</h3>
-    <table>
-        <thead>
             <tr>
-                <th>IP Address or Range</th>
-                <th>Action</th>
+                <td><a href="settings.php">Configure Script Settings</a></td>
+                <td><a href="change_password.php">Change Admin Password</a></td>
             </tr>
-        </thead>
-        <tbody>
-            <?php foreach ($permanentlyBlockedIPs as $ip): ?>
-                <tr>
-                    <td>
-                        <?php echo $ip['ip_range']; ?>
-                    </td>
-                    <td><a href="delete_permanent_ip.php?ip=<?php echo $ip['ip_range']; ?>">Delete</a></td>
-                </tr>
-            <?php endforeach; ?>
+            <tr>
+                <td colspan="2">
+                    <h4>Blocked IP Addresses</h4>
+                    <?php if ($blockedIPs !== false): ?>
+                        <table>
+                            <thead>
+                                <tr>
+                                    <th>IP Address</th>
+                                    <th>Fingerprints</th>
+                                    <th>Blocked Ad Units</th>
+                                    <th>Blocked Until</th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                <?php foreach ($blockedIPs as $ip): ?>
+                                    <tr>
+                                        <td>
+                                            <?php echo $ip['ip_address']; ?>
+                                        </td>
+                                        <td>
+                                            <?php echo implode(', ', explode(',', $ip['fingerprints'])); ?>
+                                        </td>
+                                        <td>
+                                            <?php echo implode(', ', explode(',', $ip['ad_units'])); ?>
+                                        </td>
+                                        <td>
+                                            <?php echo $ip['block_until']; ?>
+                                        </td>
+                                        <td>
+                                            <a href="unblock_ip.php?ip=<?php echo urlencode($ip['ip_address']); ?>">Unblock</a>
+                                        </td>
+                                    </tr>
+                                <?php endforeach; ?>
+                            </tbody>
+                        </table>
+                    <?php else: ?>
+                        <p>There was an error fetching blocked IPs. Please ensure the database is properly set up.</p>
+                    <?php endif; ?>
+                </td>
+            </tr>
+
+            <tr>
+                <td colspan="2">
+
+                    <form action="add_permanent_block.php" method="post">
+                        <label for="ip_range">Enter IP or Range:</label>
+                        <input type="text" name="ip_range" id="ip_range">
+                        <input type="submit" value="Block IP/Range Permanently">
+                    </form>
+
+                    <h4>Permanently Blocked IP Addresses</h4>
+                    <?php if ($permanentBlockedIPs !== false && !empty($permanentBlockedIPs)): ?>
+                        <table>
+                            <thead>
+                                <tr>
+                                    <th>IP Address or Range</th>
+                                    <th>Action</th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                <?php foreach ($permanentBlockedIPs as $ip): ?>
+                                    <tr>
+                                        <td>
+                                            <?php echo htmlspecialchars($ip['ip_range']); ?>
+                                        </td>
+                                        <td>
+                                            <a
+                                                href="unblock_permanent_ip.php?ip=<?php echo urlencode($ip['ip_range']); ?>">Unblock</a>
+                                        </td>
+                                    </tr>
+                                <?php endforeach; ?>
+                            </tbody>
+                        </table>
+                    <?php else: ?>
+                        <p>No IP addresses or ranges are permanently blocked.</p>
+                    <?php endif; ?>
+
+                    <h4>Import SQL Schema</h4>
+                    <form action="import_db.php" method="post" enctype="multipart/form-data">
+                        <label>
+                            SQL File:
+                            <input type="file" name="sqlfile" accept=".sql">
+                        </label>
+                        <br>
+                        <input type="submit" value="Import">
+                    </form>
+                </td>
+            </tr>
         </tbody>
     </table>
-
 </body>
 
 </html>
